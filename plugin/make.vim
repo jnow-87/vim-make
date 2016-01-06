@@ -23,9 +23,9 @@ endif
 
 let g:loaded_make = 1
 
-command! -nargs=? Make call s:make(<f-args>)
-command! -nargs=0 MakeToggle silent call s:makeToggle(0)
-"command! -nargs=0 MakeDebug silent call s:makeDebugShow()
+command -nargs=? Make call s:make(<f-args>)
+command -nargs=0 MakeToggle silent call s:makeToggle(0)
+"command -nargs=0 MakeDebug silent call s:makeDebugShow()
 
 autocmd TabEnter * silent call s:makeTabSwitch()
 autocmd BufWinLeave * silent call s:makeCloseIfLast()
@@ -46,7 +46,7 @@ let s:makeDebugFile = "/tmp/make.debug"
 let s:makeDebugMsg = ""
 "silent! exe "!rm " . s:makeDebugFile
 
-"function! s:makeDebugShow()
+"function s:makeDebugShow()
 "    new makeDebug.txt
 "    silent! %delete _
 "    silent! 0put =s:makeDebugMsg
@@ -57,7 +57,7 @@ let s:makeDebugMsg = ""
 "	setlocal buflisted
 "endfunction
 
-function! s:makeDebug(msg)
+function s:makeDebug(msg)
 	if s:makeDebugFile != ""
 		exe "redir >> " . s:makeDebugFile
 		silent echo strftime('%H:%M:%S') . ': ' . a:msg
@@ -74,7 +74,7 @@ endfunction
 " run make for given target and display output
 "
 " 	call makeToggle with "1" to read the parsefile again
-function! s:make(...)
+function s:make(...)
 "	call s:makeDebug("make()")
 
 	if a:0 == 0
@@ -90,7 +90,7 @@ endfunction
 "
 "	read, parse and highlight the current line and jump to file if necessary
 " 	mappings set in makeToggle()
-function! s:gotoFile()
+function s:gotoFile()
 "	call s:makeDebug("gotoFile()")
 
 	let e = s:parseline(getline('.'))
@@ -110,7 +110,7 @@ endfunction
 " 
 " 	if make is active and buffer is not displayed open them
 " 	called via autocmd
-function! s:makeTabSwitch()
+function s:makeTabSwitch()
 "	call s:makeDebug("makeTabSwitch()")
 
 	if bufwinnr(bufnr(s:makeTitle)) == -1
@@ -134,7 +134,7 @@ endfunction
 " 	if buffer is not display open a window
 " 	if window already exist switch into or close if already in
 " 	if reset is "1" reread buffer content (s:parsefile)
-function! s:makeToggle(reset)
+function s:makeToggle(reset)
 "	call s:makeDebug("makeToggle()")
 
 	let makeBufNr = bufnr(s:makeTitle)
@@ -190,7 +190,7 @@ endfunction
 "	check if given line has format 'file:line msg'
 " 	if yes return [file, line]
 " 	if no return [-1]
-function! s:parseline(line)
+function s:parseline(line)
 "	call s:makeDebug("parseline()")
 
 " V1 with regex
@@ -226,7 +226,7 @@ function! s:parseline(line)
 endfunction
 
 " close makeBufWin if it is the last in tabpage
-function! s:makeCloseIfLast()
+function s:makeCloseIfLast()
 "	call s:makeDebug("makeCloseIfLast()")
 
 	if winnr('$') == 2
@@ -240,7 +240,7 @@ function! s:makeCloseIfLast()
 endfunction
 
 " highlight line lineNr in window winNr
-function! s:highlightLine(winNr, lineNr)
+function s:highlightLine(winNr, lineNr)
 "	call s:makeDebug("highlightLine()")
 
 	let curWinNr = winnr()
@@ -263,7 +263,7 @@ endfunction
 " 	return	0	all ok
 " 			1	current window is target window 
 " 			-1	buffer not displayed in any window
-function! s:switchWindow(bufNr)
+function s:switchWindow(bufNr)
 "	call s:makeDebug("switchWindow()")
 
 	let winNr = bufwinnr(a:bufNr)
@@ -285,7 +285,7 @@ endfunction
 " switch cursor to line lineNr in  file filename
 " 	return 0 if tabpage with file was already displayed
 " 	return 1 if created new tabpage with file
-function! s:switchFile(filename, lineNr)
+function s:switchFile(filename, lineNr)
 "	call s:makeDebug("switchFile()")
 
 	let bufNr = bufnr(a:filename)
@@ -335,7 +335,7 @@ endfunction
 
 " run the shell make command with target an write output
 " to file filename
-function! s:makeRun(target)
+function s:makeRun(target)
 "	call s:makeDebug("makeRun()")
 
 	" shell script
