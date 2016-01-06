@@ -30,7 +30,7 @@ autocmd BufWinLeave * silent call s:makeCloseIfLast()
 autocmd WinLeave * silent let lastActiveBuffer = winbufnr(0) 		" monitor each switch between windows and safe bufnr for the leaved window (used to jump back to it)
 autocmd BufWinLeave __Make__ silent let s:makeIsActive = 0
 
-highlight MakeHighlight ctermfg=darkblue
+highlight def link MakeHighlight mblue
 
 let loaded_make = 1
 let lastActiveBuffer = -1
