@@ -17,9 +17,11 @@
 "		makeDebugShow()					display debug messages for current vim seassion
 "		makeDebug(msg)					add a message to debuglog
 
-if exists('loaded_make')
+if exists('g:loaded_make') || &compatible
 	finish
 endif
+
+let g:loaded_make = 1
 
 command! -nargs=? Make call s:make(<f-args>)
 command! -nargs=0 MakeToggle silent call s:makeToggle(0)
@@ -32,7 +34,6 @@ autocmd BufWinLeave __Make__ silent let s:makeIsActive = 0
 
 highlight def link MakeHighlight mblue
 
-let loaded_make = 1
 let lastActiveBuffer = -1
 let s:tmpfile = "/tmp/out"
 let s:parsefile = "/tmp/parse"
