@@ -21,17 +21,19 @@ if exists('loaded_make')
 	finish
 endif
 
-command! -nargs=1 Make call s:make(<f-args>)
+command! -nargs=? Make call s:make(<f-args>)
 command! -nargs=0 MakeToggle silent call s:makeToggle(0)
 "command! -nargs=0 MakeDebug silent call s:makeDebugShow()
 
 autocmd TabEnter * silent call s:makeTabSwitch()
 autocmd BufWinLeave * silent call s:makeCloseIfLast()
+autocmd WinLeave * silent let lastActiveBuffer = winbufnr(0) 		" monitor each switch between windows and safe bufnr for the leaved window (used to jump back to it)
 autocmd BufWinLeave __Make__ silent let s:makeIsActive = 0
 
 highlight MakeHighlight ctermfg=darkblue
 
-let loaded_make=1
+let loaded_make = 1
+let lastActiveBuffer = -1
 let s:tmpfile = "/tmp/out"
 let s:parsefile = "/tmp/parse"
 let s:makeTitle = "__Make__"
@@ -39,8 +41,8 @@ let s:makeWinHeight = 7
 let s:makeIsActive = 0
 
 " debugging stuff
-"let s:makeDebugFile = "/tmp/make.debug"
-"let s:makeDebugMsg = ""
+let s:makeDebugFile = "/tmp/make.debug"
+let s:makeDebugMsg = ""
 "silent! exe "!rm " . s:makeDebugFile
 
 "function! s:makeDebugShow()
@@ -54,27 +56,32 @@ let s:makeIsActive = 0
 "	setlocal buflisted
 "endfunction
 
-"function! s:makeDebug(msg)
-"	if s:makeDebugFile != ""
-"		exe "redir >> " . s:makeDebugFile
-"		silent echo strftime('%H:%M:%S') . ': ' . a:msg
-"		redir END
-"	endif
-"
-"	if strlen(s:makeDebugMsg) > 3000
-"		let s:makeDebugMsg = strpart(s:makeDebugMsg, strlen(s:makeDebugMsg) - 3000)
-"	endif
-"
-"	let s:makeDebugMsg = s:makeDebugMsg . strftime('%H:%M:%S') . ': ' . a:msg . "\n"
-"endfunction
+function! s:makeDebug(msg)
+	if s:makeDebugFile != ""
+		exe "redir >> " . s:makeDebugFile
+		silent echo strftime('%H:%M:%S') . ': ' . a:msg
+		redir END
+	endif
+
+	if strlen(s:makeDebugMsg) > 3000
+		let s:makeDebugMsg = strpart(s:makeDebugMsg, strlen(s:makeDebugMsg) - 3000)
+	endif
+
+	let s:makeDebugMsg = s:makeDebugMsg . strftime('%H:%M:%S') . ': ' . a:msg . "\n"
+endfunction
 
 " run make for given target and display output
 "
 " 	call makeToggle with "1" to read the parsefile again
-function! s:make(target)
+function! s:make(...)
 "	call s:makeDebug("make()")
 
-	call s:makeRun(a:target)
+	if a:0 == 0
+		call s:makeRun("all")
+	else
+		call s:makeRun(a:1)
+	endif
+
 	call s:makeToggle(1)
 endfunction
 
@@ -110,16 +117,9 @@ function! s:makeTabSwitch()
 			return
 		endif
 
-		let curWinNr = winnr()
 		call s:makeToggle(0)
-		exe curWinNr . "wincmd w"
 	else
 		if s:makeIsActive == 1
-			if winnr('$') == 1
-				let size = &window - s:makeWinHeight - 2 
-				exe size . "split"
-			endif
-
 			return
 		endif
 
@@ -155,6 +155,7 @@ function! s:makeToggle(reset)
 
 		nnoremap <buffer> <silent> <CR> :call <SID>gotoFile()<CR>
 		inoremap <buffer> <silent> <CR> :call <SID>gotoFile()<CR><insert>
+		nnoremap <buffer> <silent> <INSERT> :call <SID>switchWindow(g:lastActiveBuffer)<CR>
 
 		syntax match MakeHighlight '^\t\w*'
 
@@ -324,10 +325,10 @@ function! s:switchFile(filename, lineNr)
 				exe ":" . a:lineNr
 				return 1
 			endif
-		else
-			exe ":" . a:lineNr
-			return 0
 		endif
+
+		exe ":" . a:lineNr
+		return 0
 	endif
 endfunction
 
