@@ -88,14 +88,14 @@ function s:make_show(show)
 		let s:make_active = 1
 
 		" open make buffer if not already shown
-		if bufwinnr(g:make_win_title) == -1
+		if bufwinnr("^" . g:make_win_title . "$") == -1
 			exec "botright ". g:make_win_height ." split " . g:make_win_title
 		endif
 	else
 		let s:make_active = 0
 
 		" switch to window and close it
-		if s:switch_window(bufwinnr(g:make_win_title)) == 0
+		if s:switch_window(bufwinnr("^" . g:make_win_title . "$")) == 0
 			quit
 		endif
 	endif
@@ -123,7 +123,7 @@ function s:make_select()
 
 	" make sure the make window is shown and focused
 	call s:make_show(1)
-	call s:switch_window(bufwinnr(g:make_win_title))
+	call s:switch_window(bufwinnr("^" . g:make_win_title . "$"))
 	
 	" highlight selected line in make buffer
 	match none
@@ -165,7 +165,7 @@ function s:make_run(...)
 
 	" show and focus make window 
 	call s:make_show(1)
-	call s:switch_window(bufwinnr(g:make_win_title))
+	call s:switch_window(bufwinnr("^" . g:make_win_title . "$"))
 
 	" reset/init buffer
 	setlocal noreadonly
