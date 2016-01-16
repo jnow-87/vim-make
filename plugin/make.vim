@@ -186,7 +186,7 @@ function s:make_run(...)
 			exec err_cnt + warn_cnt . "put ='\t\t" . file . ":" . line . "\t" . msg . "'"
 			let warn_cnt += 1
 
-		elseif stridx(line, 'make:') != -1
+		elseif stridx(line, 'make:') != -1 && stridx(line, '\*\*\*') != -1
 			let msg = split(line, '\*\*\*')[1]
 			exec err_cnt + warn_cnt + sys_cnt . "put ='\t\t" . msg . "'"
 			let sys_cnt += 1
