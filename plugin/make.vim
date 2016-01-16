@@ -204,6 +204,12 @@ function s:make_run(...)
 	" disable make buffer modification
 	setlocal readonly
 	setlocal nomodifiable
+
+	" hide make buffer if nothing to show
+	if err_cnt + warn_cnt + sys_cnt == 0
+		call s:make_show(0)
+		echom "make succeed"
+	endif
 endfunction
 "}}}
 
