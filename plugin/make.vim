@@ -75,6 +75,24 @@ function s:switch_file(file)
 endfunction
 "}}}
 
+"{{{
+" \brief	parse given line, extracting 'file', 'line' and 'message'
+"
+" \param	line	line to parse
+"
+" \return	[ 'file', 'line', 'message' ]
+function s:parse_line(line)
+	let lst = split(a:line, ':')
+
+	" at least 5 elements expected (file, line, column, message type, message)
+	if len(lst) >= 5
+		return [ lst[0], lst[1], join(lst[4:]) ]
+	endif
+
+	return [ "plugin error", 0, "parsing line: \\\"" . a:line . "\\\"" ]
+endfunction
+"}}}
+"
 """"
 "" main functions
 """"
@@ -177,12 +195,12 @@ function s:make_run(...)
 	" parse make output, filtering errors, warnings and make messages
 	for line in split(out, '[\r\n]')
 		if stridx(line, 'error:') != -1
-			let [ file, line, col, type, msg ] = split(line, ':')
+			let [ file, line, msg ] = s:parse_line(line)
 			exec err_cnt . "put ='\t\t" . file . ":" . line . "\t" . msg . "'"
 			let err_cnt += 1
 
 		elseif stridx(line, 'warning:') != -1
-			let [ file, line, col, type, msg ] = split(line, ':')
+			let [ file, line, msg ] = s:parse_line(line)
 			exec err_cnt + warn_cnt . "put ='\t\t" . file . ":" . line . "\t" . msg . "'"
 			let warn_cnt += 1
 
