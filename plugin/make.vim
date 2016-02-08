@@ -196,17 +196,17 @@ function s:make_run(...)
 	for line in split(out, '[\r\n]')
 		if stridx(line, 'error:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			exec err_cnt . "put ='\t\t" . file . ":" . line . "\t" . msg . "'"
+			call append(err_cnt, "\t\t" . file . ":" . line . "\t" . msg)
 			let err_cnt += 1
 
 		elseif stridx(line, 'warning:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			exec err_cnt + warn_cnt . "put ='\t\t" . file . ":" . line . "\t" . msg . "'"
+			call append(err_cnt + warn_cnt, "\t\t" . file . ":" . line . "\t" . msg)
 			let warn_cnt += 1
 
 		elseif stridx(line, 'make:') != -1 && stridx(line, '\*\*\*') != -1
 			let msg = split(line, '\*\*\*')[1]
-			exec err_cnt + warn_cnt + sys_cnt . "put ='\t\t" . msg . "'"
+			call append(err_cnt + warn_cnt + sys_cnt, "\t\t" . msg )
 			let sys_cnt += 1
 		endif
 	endfor
