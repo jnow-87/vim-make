@@ -84,15 +84,19 @@ endfunction
 function s:parse_line(line)
 	let lst = split(a:line, ':')
 
-	" at least 5 elements expected (file, line, column, message type, message)
 	if len(lst) >= 5
+		" at least 5 elements expected (file, line, column, message type, message)
 		return [ lst[0], lst[1], join(lst[4:]) ]
+
+	elseif  len(lst) == 4
+		" 4 elements expected (file, line, message type, message)
+		return [ lst[0], lst[1], lst[3] ]
 	endif
 
 	return [ "plugin error", 0, "parsing line: \\\"" . a:line . "\\\"" ]
 endfunction
 "}}}
-"
+
 """"
 "" main functions
 """"
@@ -194,7 +198,7 @@ function s:make_run(...)
 
 	" parse make output, filtering errors, warnings and make messages
 	for line in split(out, '[\r\n]')
-		if stridx(line, 'error:') != -1
+		if stridx(line, 'error:') != -1 || stridx(line, 'Error:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
 			call append(err_cnt, "\t\t" . file . ":" . line . "\t" . msg)
 			let err_cnt += 1
