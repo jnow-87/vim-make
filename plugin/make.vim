@@ -237,7 +237,7 @@ endfunction
 "{{{
 " init make buffer local settings
 exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
-	\ set filetype=make |
+	\ set filetype=makelog |
 	\ setlocal noswapfile |
 	\ setlocal readonly |
 	\ setlocal nomodifiable |
