@@ -204,7 +204,7 @@ function s:make_run(...)
 			call append(err_cnt + warn_cnt, "\t\t" . file . ":" . line . "\t" . msg)
 			let warn_cnt += 1
 
-		elseif stridx(line, 'make:') != -1 && stridx(line, '\*\*\*') != -1
+		elseif stridx(line, 'make:') != -1 && stridx(line, '***') != -1
 			let msg = split(line, '\*\*\*')[1]
 			call append(err_cnt + warn_cnt + sys_cnt, "\t\t" . msg )
 			let sys_cnt += 1
@@ -213,7 +213,7 @@ function s:make_run(...)
 
 	" put individual section headers to make buffer
 	exec "0put ='\terror (" . err_cnt . ")'"
-	exec err_cnt + 1. "put =''"
+	exec err_cnt + 1 . "put =''"
 	exec err_cnt + 2 . "put ='\twarnings (" . warn_cnt . ")'"
 	exec err_cnt + warn_cnt + 3 . "put =''"
 	exec err_cnt + warn_cnt + 4 . "put ='\tsystem (" . sys_cnt . ")'"
