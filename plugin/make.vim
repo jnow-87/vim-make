@@ -200,27 +200,27 @@ function s:make_run(...)
 	for line in split(out, '[\r\n]')
 		if stridx(line, 'error:') != -1 || stridx(line, 'Error:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			call append(err_cnt, "\t\t" . file . ":" . line . "\t" . msg)
+			call append(err_cnt, "\t" . file . ":" . line . "\t" . msg)
 			let err_cnt += 1
 
 		elseif stridx(line, 'warning:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			call append(err_cnt + warn_cnt, "\t\t" . file . ":" . line . "\t" . msg)
+			call append(err_cnt + warn_cnt, "\t" . file . ":" . line . "\t" . msg)
 			let warn_cnt += 1
 
 		elseif stridx(line, 'make:') != -1 && stridx(line, '***') != -1
 			let msg = split(line, '\*\*\*')[1]
-			call append(err_cnt + warn_cnt + sys_cnt, "\t\t" . msg )
+			call append(err_cnt + warn_cnt + sys_cnt, "\t" . msg )
 			let sys_cnt += 1
 		endif
 	endfor
 
 	" put individual section headers to make buffer
-	exec "0put ='\terror (" . err_cnt . ")'"
+	exec "0put =' error (" . err_cnt . ")'"
 	exec err_cnt + 1 . "put =''"
-	exec err_cnt + 2 . "put ='\twarnings (" . warn_cnt . ")'"
+	exec err_cnt + 2 . "put =' warnings (" . warn_cnt . ")'"
 	exec err_cnt + warn_cnt + 3 . "put =''"
-	exec err_cnt + warn_cnt + 4 . "put ='\tsystem (" . sys_cnt . ")'"
+	exec err_cnt + warn_cnt + 4 . "put =' system (" . sys_cnt . ")'"
 	exec 0
 
 	" disable make buffer modification
@@ -250,7 +250,8 @@ exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
 	\ setlocal buftype=nofile |
 	\ setlocal nobuflisted |
 	\ setlocal colorcolumn=0 |
-	\ syntax match make_header "^\t\w*"|
+	\ setlocal foldmethod=indent |
+	\ syntax match make_header "^ \zs\w*\ze ([0-9]*)"|
 	\ nnoremap <buffer> <silent> <insert> <esc>|
 	\ nnoremap <buffer> <silent> i <esc>|
 	\ nnoremap <buffer> <silent> <cr> :call <sid>make_select()<cr>|
