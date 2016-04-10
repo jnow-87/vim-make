@@ -23,59 +23,6 @@ let s:make_active = 0
 "" helper functions
 """"
 "{{{
-" \brief	switch to given window in current tab
-"
-" \param	win		window number to switch to
-"
-" \return	0		on success
-" 			-1		on negative window number
-function s:switch_window(win)
-	if a:win == -1
-		return -1
-	endif
-
-	exec a:win . "wincmd w"
-	return 0
-endfunction
-"}}}
-
-"{{{
-" \brief	switch given file, potentially switching to another tab or
-" 			open a new tab
-"
-" \param	file	filename to switch to
-"
-" \return	0		buffer for the file found/switched in the current tab
-"			1		filen opened or found in another tab
-function s:switch_file(file)
-	let bnum = bufnr(a:file)
-
-	if bnum != -1
-		" buffer exists, try to switch to its window in the current tab
-		if s:switch_window(bufwinnr(bnum)) == 0
-			return 0
-		endif
-
-		" if buffer not found in current tab, check all tabs
-		for i in range(1, tabpagenr('$'))
-			if index(tabpagebuflist(i), bnum) != -1
-				" switch tab and window once buffer found
-				exec "tabnext " . i
-				call s:switch_window(bufwinnr(bnum))
-
-				return 1
-			endif
-		endfor
-	endif
-
-	" open file in new tab
-	exec "tabnew " . a:file
-
-	return 1
-endfunction
-"}}}
-
-"{{{
 " \brief	parse given line, extracting 'file', 'line' and 'message'
 "
 " \param	line	line to parse
@@ -117,7 +64,7 @@ function s:make_show(show)
 		let s:make_active = 0
 
 		" switch to window and close it
-		if s:switch_window(bufwinnr("^" . g:make_win_title . "$")) == 0
+		if util#window#focus_window(bufwinnr("^" . g:make_win_title . "$"), -1, 0) == 0
 			quit
 		endif
 	endif
@@ -141,11 +88,11 @@ function s:make_select()
 	let lnum = line('.')
 
 	" jump to selected file and line
-	call s:switch_file(sfile)
+	call util#window#focus_file(sfile, -1, 0)
 
 	" make sure the make window is shown and focused
 	call s:make_show(1)
-	call s:switch_window(bufwinnr("^" . g:make_win_title . "$"))
+	call util#window#focus_window(bufwinnr("^" . g:make_win_title . "$"), -1, 0)
 	
 	" highlight selected line in make buffer
 	match none
@@ -187,7 +134,7 @@ function s:make_run(...)
 
 	" show and focus make window 
 	call s:make_show(1)
-	call s:switch_window(bufwinnr("^" . g:make_win_title . "$"))
+	call util#window#focus_window(bufwinnr("^" . g:make_win_title . "$"), -1, 0)
 
 	" reset/init buffer
 	setlocal noreadonly
