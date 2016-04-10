@@ -216,12 +216,20 @@ function s:make_run(...)
 	endfor
 
 	" put individual section headers to make buffer
+	silent! 0,$foldopen
 	exec "0put =' error (" . err_cnt . ")'"
+
+	silent! 0,$foldopen
 	exec err_cnt + 1 . "put =''"
 	exec err_cnt + 2 . "put =' warnings (" . warn_cnt . ")'"
+
+	silent! 0,$foldopen
 	exec err_cnt + warn_cnt + 3 . "put =''"
 	exec err_cnt + warn_cnt + 4 . "put =' system (" . sys_cnt . ")'"
+
 	exec 0
+	silent! 0,$foldclose
+	silent! 2foldopen
 
 	" disable make buffer modification
 	setlocal readonly
@@ -250,7 +258,8 @@ exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
 	\ setlocal buftype=nofile |
 	\ setlocal nobuflisted |
 	\ setlocal colorcolumn=0 |
-	\ setlocal foldmethod=indent |
+	\ setlocal foldmethod=syntax |
+	\ syntax region make_content start="^\t" end="^$"me=s-1 skip="\t" fold |
 	\ syntax match make_header "^ \zs\w*\ze ([0-9]*)"|
 	\ nnoremap <buffer> <silent> <insert> <esc>|
 	\ nnoremap <buffer> <silent> i <esc>|
@@ -260,7 +269,7 @@ exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
 " close make buffer if its the last in the current tab
 exec 'autocmd BufEnter ' . g:make_win_title . ' silent if winnr("$") == 1 | quit | endif'
 
-" diactivate make once leaving the buffer 
+" deactivate make once leaving the buffer
 exec 'autocmd BufWinLeave ' . g:make_win_title . ' silent let s:make_active = 0'
 
 " check make buffer when entering another tab
