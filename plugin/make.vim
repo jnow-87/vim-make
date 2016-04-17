@@ -96,7 +96,7 @@ function s:make_select()
 	
 	" highlight selected line in make buffer
 	match none
-	exec 'match Search /\%' . lnum . 'l.*/'
+	exec 'match make_select /\%' . lnum . 'l[^ \t].*/'
 
 	" switch back previous window and select respective line
 	exec "wincmd W"
@@ -236,4 +236,5 @@ command -nargs=0 MakeToggle		silent call s:make_show(!s:make_active)
 """"
 "{{{
 highlight default make_header ctermfg=6
+highlight default make_select ctermfg=255 ctermbg=31
 "}}}
