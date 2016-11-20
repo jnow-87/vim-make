@@ -17,6 +17,12 @@ let g:make_win_height = get(g:, "make_win_height", 7)
 """"
 "{{{
 let s:make_active = 0
+
+let s:err_cnt = 0
+let s:err_idx = -1
+let s:warn_cnt = 0
+let s:warn_idx = -1
+
 "}}}
 
 """"
@@ -103,7 +109,7 @@ function s:make_select()
 	exec slnum
 
 	" enter insert mode
-	call feedkeys('i')
+"	call feedkeys('i')
 endfunction
 "}}}
 
@@ -125,9 +131,12 @@ endfunction
 "
 " \param	...		optional make target
 function s:make_run(...)
-	let err_cnt = 0
-	let warn_cnt = 0
+	let s:err_cnt = 0
+	let s:warn_cnt = 0
 	let sys_cnt = 0
+
+	let s:err_idx = -1
+	let s:warn_idx = -1
 
 	" execute make
 	let out = system("make " . (a:0 ? a:1 : ""))
@@ -147,32 +156,32 @@ function s:make_run(...)
 	for line in split(out, '[\r\n]')
 		if stridx(line, 'error:') != -1 || stridx(line, 'Error:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			call append(err_cnt, "\t" . file . ":" . line . "\t" . msg)
-			let err_cnt += 1
+			call append(s:err_cnt, "\t" . file . ":" . line . "\t" . msg)
+			let s:err_cnt += 1
 
 		elseif stridx(line, 'warning:') != -1
 			let [ file, line, msg ] = s:parse_line(line)
-			call append(err_cnt + warn_cnt, "\t" . file . ":" . line . "\t" . msg)
-			let warn_cnt += 1
+			call append(s:err_cnt + s:warn_cnt, "\t" . file . ":" . line . "\t" . msg)
+			let s:warn_cnt += 1
 
 		elseif stridx(line, 'make:') != -1 && stridx(line, '***') != -1
 			let msg = split(line, '\*\*\*')[1]
-			call append(err_cnt + warn_cnt + sys_cnt, "\t" . msg )
+			call append(s:err_cnt + s:warn_cnt + sys_cnt, "\t" . msg )
 			let sys_cnt += 1
 		endif
 	endfor
 
 	" put individual section headers to make buffer
 	silent! 0,$foldopen
-	exec "0put =' error (" . err_cnt . ")'"
+	exec "0put =' error (" . s:err_cnt . ")'"
 
 	silent! 0,$foldopen
-	exec err_cnt + 1 . "put =''"
-	exec err_cnt + 2 . "put =' warnings (" . warn_cnt . ")'"
+	exec s:err_cnt + 1 . "put =''"
+	exec s:err_cnt + 2 . "put =' warnings (" . s:warn_cnt . ")'"
 
 	silent! 0,$foldopen
-	exec err_cnt + warn_cnt + 3 . "put =''"
-	exec err_cnt + warn_cnt + 4 . "put =' system (" . sys_cnt . ")'"
+	exec s:err_cnt + s:warn_cnt + 3 . "put =''"
+	exec s:err_cnt + s:warn_cnt + 4 . "put =' system (" . sys_cnt . ")'"
 
 	exec 0
 	silent! 0,$foldclose
@@ -183,9 +192,60 @@ function s:make_run(...)
 	setlocal nomodifiable
 
 	" hide make buffer if nothing to show
-	if err_cnt + warn_cnt + sys_cnt == 0
+	if s:err_cnt + s:warn_cnt + sys_cnt == 0
 		call s:make_show(0)
 		echom "make succeed"
+	endif
+endfunction
+"}}}
+
+"{{{
+" \brief	cycle through error and warning messages
+"
+" \param	type	message type (e: error, w: warning)
+" \param	dir		direction to cycle (p: backward, n: forward)
+function s:make_cycle(type, dir)
+	let idx = 0
+
+	if a:type == 'e'
+		if a:dir == 'p'
+			if s:err_idx > 0
+				let s:err_idx -= 1
+			else
+				let s:err_idx = s:err_cnt - 1
+			endif
+		else
+			if s:err_idx < s:err_cnt - 1
+				let s:err_idx += 1
+			else
+				let s:err_idx = 0
+			endif
+		endif
+
+		let idx = s:err_idx + 2
+
+	elseif a:type == 'w'
+		if a:dir == 'p'
+			if s:warn_idx > 0
+				let s:warn_idx -= 1
+			else
+				let s:warn_idx = s:warn_cnt - 1
+			endif
+		else
+			if s:warn_idx < s:warn_cnt - 1
+				let s:warn_idx += 1
+			else
+				let s:warn_idx = 0
+			endif
+		endif
+
+		let idx = s:warn_idx + 4 + s:err_cnt
+	endif
+
+	if s:err_cnt + s:warn_cnt != 0
+		call s:make_show(1)
+		call util#window#focus_window(bufwinnr("^" . g:make_win_title . "$"), idx, 1)
+		call s:make_select()
 	endif
 endfunction
 "}}}
@@ -229,6 +289,7 @@ autocmd TabEnter * silent call s:make_switch_tab()
 "{{{
 command -nargs=? Make			call s:make_run(<f-args>)
 command -nargs=0 MakeToggle		silent call s:make_show(!s:make_active)
+command -nargs=+ MakeCycle		silent call s:make_cycle(<f-args>)
 "}}}
 
 """"
