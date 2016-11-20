@@ -88,7 +88,7 @@ function s:make_select()
 	let lnum = line('.')
 
 	" jump to selected file and line
-	call util#window#focus_file(sfile, -1, 0)
+	call util#window#focus_file(sfile, slnum, 1)
 
 	" make sure the make window is shown and focused
 	call s:make_show(1)
