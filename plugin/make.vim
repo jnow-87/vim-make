@@ -4,12 +4,19 @@ endif
 
 let g:loaded_make = 1
 
+" get own script ID
+nmap <c-f11><c-f12><c-f13> <sid>
+let s:sid = "<SNR>" . maparg("<c-f11><c-f12><c-f13>", "n", 0, 1).sid . "_"
+nunmap <c-f11><c-f12><c-f13>
+
+
 """"
 "" global variables
 """"
 "{{{
 let g:make_win_title = get(g:, "make_win_title", "make")
 let g:make_win_height = get(g:, "make_win_height", 7)
+let g:make_key_select = get(g:, "make_key_select", "<cr>")
 "}}}
 
 """"
@@ -26,7 +33,7 @@ let s:warn_idx = -1
 "}}}
 
 """"
-"" helper functions
+"" local functions
 """"
 "{{{
 " \brief	parse given line, extracting 'file', 'line' and 'message'
@@ -51,7 +58,7 @@ endfunction
 "}}}
 
 """"
-"" main functions
+"" global functions
 """"
 "{{{
 " \brief	open/close the make buffer window
@@ -268,9 +275,9 @@ exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
 	\ setlocal foldmethod=syntax |
 	\ syntax region make_content start="^\t" end="^$"me=s-1 skip="\t" fold |
 	\ syntax match make_header "^ \zs\w*\ze ([0-9]*)"|
-	\ nnoremap <buffer> <silent> <insert> <esc>|
-	\ nnoremap <buffer> <silent> i <esc>|
-	\ nnoremap <buffer> <silent> <cr> :call <sid>make_select()<cr>|
+	\ call util#map#n("<insert>", "<esc>", "<buffer>")|
+	\ call util#map#n("i", "<esc>", "<buffer>")|
+	\ call util#map#n(g:make_key_select, ":call " . s:sid . "make_select()<cr>", "<buffer>")
 	\ '
 
 " close make buffer if its the last in the current tab
