@@ -100,9 +100,6 @@ function s:make_select()
 	" store current make window line
 	let lnum = line('.')
 
-	" jump to selected file and line
-	call util#window#focus_file(sfile, slnum, 1)
-
 	" make sure the make window is shown and focused
 	call s:make_show(1)
 	call util#window#focus_window(bufwinnr("^" . g:make_win_title . "$"), -1, 0)
@@ -111,9 +108,8 @@ function s:make_select()
 	match none
 	exec 'match make_select /\%' . lnum . 'l[^ \t].*/'
 
-	" switch back previous window and select respective line
-	exec "wincmd W"
-	exec slnum
+	" jump to selected file and line
+	call util#window#focus_file(sfile, slnum, 1)
 
 	" enter insert mode
 "	call feedkeys('i')
