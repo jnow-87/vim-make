@@ -14,6 +14,7 @@ nunmap <c-f11><c-f12><c-f13>
 "" global variables
 """"
 "{{{
+let g:make_target = ""
 let g:make_win_title = get(g:, "make_win_title", "make")
 let g:make_win_height = get(g:, "make_win_height", 7)
 let g:make_key_select = get(g:, "make_key_select", "<cr>")
@@ -142,7 +143,7 @@ function s:make_run(...)
 	let s:warn_idx = -1
 
 	" execute make
-	let out = system("make " . (a:0 ? a:1 : ""))
+	let out = system("make " . (a:0 ? a:1 : g:make_target))
 
 	" show and focus make window 
 	call s:make_show(1)
