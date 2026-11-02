@@ -278,7 +278,7 @@ exec 'autocmd BufWinEnter ' . g:make_win_title . ' silent
 	\ '
 
 " close make buffer if its the last in the current tab
-exec 'autocmd BufEnter ' . g:make_win_title . ' silent if winnr("$") == 1 | quit | endif'
+exec 'autocmd BufEnter ' . g:make_win_title . ' silent call util#window#close_if_last()'
 
 " deactivate make once leaving the buffer
 exec 'autocmd BufWinLeave ' . g:make_win_title . ' silent let s:make_active = 0'
